@@ -216,3 +216,11 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Benchmark outputs
+results/*/
+!results/.gitkeep
+
+# Secrets / local overrides
+configs/local*.yaml
+configs/*secret*

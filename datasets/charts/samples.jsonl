@@ -1,0 +1,4 @@
+{"id": "chart-001", "image": "revenue_by_region.png", "question": "Which region has the highest revenue?", "answer": "East"}
+{"id": "chart-002", "image": "revenue_by_region.png", "question": "What is the revenue for the West region in millions?", "answer": "7"}
+{"id": "chart-003", "image": "monthly_users.png", "question": "How many monthly active users (in thousands) were there in March?", "answer": "55"}
+{"id": "chart-004", "image": "monthly_users.png", "question": "Did user count increase from January to April?", "answer": "yes"}

@@ -1,0 +1,5 @@
+{"id": "text-001", "document": "q1_report.txt", "question": "What was Acme Corp's Q1 2024 revenue?", "answer": "$12.4 million"}
+{"id": "text-002", "document": "q1_report.txt", "question": "Where did Acme open a new office?", "answer": "Austin, Texas"}
+{"id": "text-003", "document": "q1_report.txt", "question": "Who is the CEO of Acme Corp?", "answer": "Maya Chen"}
+{"id": "text-004", "document": "minutes.txt", "question": "Which ordinance was approved?", "answer": "Ordinance 441"}
+{"id": "text-005", "document": "minutes.txt", "question": "How much was allocated for Riverside Green renovations?", "answer": "$250,000"}
