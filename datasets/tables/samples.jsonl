@@ -1,0 +1,4 @@
+{"id": "tbl-001", "document": "sales.csv", "question": "What was the revenue for Widget B in the North region?", "answer": "10000"}
+{"id": "tbl-002", "document": "sales.csv", "question": "How many units of Widget A were sold in the South?", "answer": "90"}
+{"id": "tbl-003", "document": "employees.md", "question": "What is Cara Li's salary?", "answer": "152000"}
+{"id": "tbl-004", "document": "fruit_table.png", "question": "How many bananas were sold in Q3?", "answer": "210"}

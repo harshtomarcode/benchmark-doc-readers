@@ -1,0 +1,4 @@
+{"id": "ocr-001", "image": "invoice_scan.png", "question": "What is the invoice number?", "answer": "INV-2048"}
+{"id": "ocr-002", "image": "invoice_scan.png", "question": "What is the amount due?", "answer": "$1,275.50"}
+{"id": "ocr-003", "image": "form_scan.png", "question": "What is the patient's name?", "answer": "Jordan Ellis"}
+{"id": "ocr-004", "image": "form_scan.png", "question": "What allergies are listed?", "answer": "Penicillin"}

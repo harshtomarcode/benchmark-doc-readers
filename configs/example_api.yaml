@@ -1,0 +1,75 @@
+# OpenAI-compatible API config.
+# Set OPENAI_API_KEY (or override api_key_env / api_key).
+# Works with OpenAI, Azure (with custom base_url), vLLM, Ollama, Groq, etc.
+#
+# Usage:
+#   export OPENAI_API_KEY=sk-...
+#   docbench run -c configs/example_api.yaml
+
+model:
+  type: api
+  id: gpt-4o-mini
+  base_url: https://api.openai.com/v1
+  api_key_env: OPENAI_API_KEY
+  # api_key: ${OPENAI_API_KEY}   # optional; env expansion supported
+  timeout_s: 120
+  request_path: /chat/completions
+  # headers: {}
+  # options:
+  #   extra_body:
+  #     top_p: 1.0
+
+qualitative:
+  enabled: true
+  tasks:
+    text_reading:
+      enabled: true
+      dataset: datasets/text
+      metrics: [exact_match, contains, token_f1]
+      # system_prompt: "You are a careful document analyst."
+      # user_prompt_template: "Document:\n{document}\n\nQ: {question}\nA:"
+    table_reading:
+      enabled: true
+      dataset: datasets/tables
+      metrics: [exact_match, contains, token_f1, numeric_tolerance]
+    chart_reading:
+      enabled: true
+      dataset: datasets/charts
+      metrics: [exact_match, contains, token_f1, numeric_tolerance]
+    infographic:
+      enabled: true
+      dataset: datasets/infographics
+      metrics: [exact_match, contains, token_f1]
+    ocr:
+      enabled: true
+      dataset: datasets/ocr
+      metrics: [exact_match, contains, token_f1]
+
+stress:
+  enabled: true
+  workloads:
+    pure_text:
+      enabled: true
+      modality: text
+      dataset: datasets/text
+      warmup: 2
+      iterations: 20
+      concurrency_levels: [1, 4, 8, 16]
+      requests_per_level: 32
+      # prompt: "Summarize in one sentence:\n\n{document}"
+    image_to_text:
+      enabled: true
+      modality: image
+      dataset: datasets/charts
+      warmup: 2
+      iterations: 20
+      concurrency_levels: [1, 4, 8]
+      requests_per_level: 24
+      # prompt: "Describe this image briefly."
+
+output:
+  dir: results
+  formats: [json, markdown]
+  # run_name: gpt4o_mini_full
+
+seed: 42

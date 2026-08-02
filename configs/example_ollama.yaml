@@ -1,0 +1,58 @@
+# Example: Ollama OpenAI-compatible endpoint (local server).
+# Start Ollama, pull a vision model, then:
+#   docbench run -c configs/example_ollama.yaml
+
+model:
+  type: api
+  id: llava
+  base_url: http://localhost:11434/v1
+  api_key: ollama          # Ollama ignores auth; placeholder is fine
+  timeout_s: 300
+
+qualitative:
+  enabled: true
+  tasks:
+    text_reading:
+      enabled: true
+      dataset: datasets/text
+      metrics: [contains, token_f1]
+    table_reading:
+      enabled: true
+      dataset: datasets/tables
+      metrics: [contains, token_f1]
+    chart_reading:
+      enabled: true
+      dataset: datasets/charts
+      metrics: [contains, token_f1]
+    infographic:
+      enabled: true
+      dataset: datasets/infographics
+      metrics: [contains, token_f1]
+    ocr:
+      enabled: true
+      dataset: datasets/ocr
+      metrics: [contains, token_f1]
+
+stress:
+  enabled: true
+  workloads:
+    pure_text:
+      enabled: true
+      modality: text
+      dataset: datasets/text
+      warmup: 1
+      iterations: 10
+      concurrency_levels: [1, 2, 4]
+      requests_per_level: 12
+    image_to_text:
+      enabled: true
+      modality: image
+      dataset: datasets/charts
+      warmup: 1
+      iterations: 10
+      concurrency_levels: [1, 2]
+      requests_per_level: 8
+
+output:
+  dir: results
+  formats: [json, markdown]
