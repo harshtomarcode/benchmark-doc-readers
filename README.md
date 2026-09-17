@@ -304,14 +304,3 @@ ModelProvider  ◄── api | local | mock   (plug in your own)
 ```
 
 Implement `docbench.models.base.ModelProvider` and register it in `models/factory.py` to add a new backend. Add a class under `tasks/` and register it in `tasks/registry.py` for a new qualitative task.
-
-## Development
-
-```bash
-pip install -e ".[dev]"
-pytest
-```
-
-## License
-
-MIT
