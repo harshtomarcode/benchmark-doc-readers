@@ -11,7 +11,6 @@ from typing import Any, Literal
 import yaml
 from pydantic import BaseModel, Field, field_validator
 
-
 _ENV_PATTERN = re.compile(r"\$\{([^}]+)\}")
 
 
@@ -98,6 +97,31 @@ class BenchConfig(BaseModel):
     @classmethod
     def _coerce_model(cls, v: Any) -> Any:
         return v
+
+
+class ReaderBenchConfig(BaseModel):
+    """File parsing or schema extraction; tools are gated by environment variables."""
+
+    manifest: str
+    root: str | None = None
+    mode: Literal["parse", "extract"] = "parse"
+    tools: dict[str, dict[str, Any]] = Field(default_factory=dict)
+    limit: int | None = Field(default=None, gt=0)
+    output: OutputConfig = Field(default_factory=OutputConfig)
+    metrics: list[str] = Field(default_factory=lambda: ["exact_match", "token_f1"])
+    extractor_options: dict[str, Any] = Field(default_factory=dict)
+
+
+def load_reader_config(path: str | Path) -> ReaderBenchConfig:
+    """Resolve paths relative to the config, so invocation cwd does not change the corpus."""
+    path = Path(path).resolve()
+    data = _expand_env(yaml.safe_load(path.read_text(encoding="utf-8")))
+    cfg = ReaderBenchConfig.model_validate(data)
+    cfg.manifest = str((path.parent / cfg.manifest).resolve())
+    if cfg.root is not None:
+        cfg.root = str((path.parent / cfg.root).resolve())
+    cfg.output.dir = str((path.parent / cfg.output.dir).resolve())
+    return cfg
 
 
 def load_config(path: str | Path) -> BenchConfig:

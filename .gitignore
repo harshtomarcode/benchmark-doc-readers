@@ -224,3 +224,6 @@ results/*/
 # Secrets / local overrides
 configs/local*.yaml
 configs/*secret*
+.env.*
+.venv-*/
+datasets/omni_extract_bench/

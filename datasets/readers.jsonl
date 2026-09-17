@@ -1,0 +1,3 @@
+{"doc_id":"fruit-table","doc_path":"tables/fruit_table.png","suite":"smoke-table"}
+{"doc_id":"invoice-scan","doc_path":"ocr/invoice_scan.png","suite":"smoke-scan"}
+{"doc_id":"revenue-chart","doc_path":"charts/revenue_by_region.png","suite":"smoke-chart"}

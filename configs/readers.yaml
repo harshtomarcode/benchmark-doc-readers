@@ -1,0 +1,20 @@
+# Raw parsing comparison. All tools are disabled until their env.example gate is set.
+# Paths are relative to this config file. Replace the manifest with your PDFs/images.
+manifest: ../datasets/readers.jsonl
+mode: parse
+tools:
+  llamaparse: {}
+  datalab: {}
+  reducto: {}
+  mistral: {}
+  unstructured_api: {strategy: hi_res}
+  docling: {}
+  marker: {}
+  unstructured: {partition: {strategy: hi_res, infer_table_structure: true}}
+  mineru: {}
+  paddleocr: {}
+  olmocr: {}
+  pymupdf4llm: {}
+  nuextract: {model: numind/NuExtract3}
+output:
+  dir: ../results

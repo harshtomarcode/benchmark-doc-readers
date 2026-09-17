@@ -1,0 +1,25 @@
+# Download the official dataset as described in README.md; Python 3.11+ / .[omni].
+# Start with 3 documents per enabled reader. Set limit: null for the full corpus.
+manifest: ../datasets/omni_extract_bench/manifest.parquet
+root: ../datasets/omni_extract_bench
+mode: extract
+limit: 3
+tools:
+  llamaparse: {}
+  datalab: {}
+  reducto: {}
+  mistral: {}
+  unstructured_api: {strategy: hi_res}
+  docling: {}
+  marker: {}
+  unstructured: {partition: {strategy: hi_res, infer_table_structure: true}}
+  mineru: {}
+  paddleocr: {}
+  olmocr: {}
+  pymupdf4llm: {}
+  nuextract: {model: numind/NuExtract3}
+extractor_options:
+  max_tokens: 16384
+  timeout_s: 300
+output:
+  dir: ../results

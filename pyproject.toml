@@ -25,6 +25,11 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+omni = [
+  "omni-extract-bench==0.1.2",
+  "polars>=1.0",
+  "huggingface-hub>=0.34",
+]
 local = [
   "transformers>=4.40",
   "torch>=2.1",
