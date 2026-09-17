@@ -105,6 +105,19 @@ class ReaderBenchConfig(BaseModel):
     manifest: str
     root: str | None = None
     mode: Literal["parse", "extract"] = "parse"
+    benchmark: Literal["custom", "omni_extract", "parsebench", "omnidocbench"] = "custom"
+    benchmark_options: dict[str, Any] = Field(default_factory=dict)
+    annotations: str | None = None
+    categories: list[str] = Field(default_factory=list)
+    tags: list[str] = Field(default_factory=list)
+    splits: list[str] = Field(default_factory=list)
+    per_category_limit: int | None = Field(default=None, gt=0)
+    repetitions: int = Field(default=1, ge=1)
+    concurrency: int = Field(default=1, ge=1)
+    warmup: int = Field(default=0, ge=0)
+    downstream_qa: bool = False
+    costs: dict[str, dict[str, float]] = Field(default_factory=dict)
+    environment: dict[str, str] = Field(default_factory=dict)
     tools: dict[str, dict[str, Any]] = Field(default_factory=dict)
     limit: int | None = Field(default=None, gt=0)
     output: OutputConfig = Field(default_factory=OutputConfig)
@@ -120,6 +133,12 @@ def load_reader_config(path: str | Path) -> ReaderBenchConfig:
     cfg.manifest = str((path.parent / cfg.manifest).resolve())
     if cfg.root is not None:
         cfg.root = str((path.parent / cfg.root).resolve())
+    if cfg.annotations is not None:
+        cfg.annotations = str((path.parent / cfg.annotations).resolve())
+    if cfg.benchmark in {"parsebench", "omnidocbench"} and cfg.mode != "parse":
+        raise ValueError(f"{cfg.benchmark} evaluates parsing; set mode: parse")
+    if cfg.benchmark == "omni_extract" and cfg.mode != "extract":
+        raise ValueError("omni_extract requires mode: extract")
     cfg.output.dir = str((path.parent / cfg.output.dir).resolve())
     return cfg
 

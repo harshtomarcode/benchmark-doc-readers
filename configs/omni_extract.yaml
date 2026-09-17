@@ -3,6 +3,7 @@
 manifest: ../datasets/omni_extract_bench/manifest.parquet
 root: ../datasets/omni_extract_bench
 mode: extract
+benchmark: omni_extract
 limit: 3
 tools:
   llamaparse: {}

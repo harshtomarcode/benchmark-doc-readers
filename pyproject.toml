@@ -25,6 +25,9 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+parsebench = [
+  "parse-bench==1.0.4",
+]
 omni = [
   "omni-extract-bench==0.1.2",
   "polars>=1.0",

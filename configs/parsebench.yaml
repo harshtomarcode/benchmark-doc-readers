@@ -1,0 +1,28 @@
+# All five official groups, at most 3 source documents per group for the pilot.
+manifest: ../datasets/parsebench
+root: ../datasets/parsebench
+benchmark: parsebench
+mode: parse
+per_category_limit: 3
+benchmark_options:
+  categories: [table, chart, text_content, text_formatting, layout]
+  timeout_s: 600
+tools:
+  llamaparse: {}
+  datalab: {}
+  reducto: {}
+  mistral: {}
+  unstructured_api: {strategy: hi_res}
+  docling: {}
+  marker: {}
+  unstructured: {partition: {strategy: hi_res, infer_table_structure: true}}
+  mineru: {}
+  paddleocr: {}
+  olmocr: {}
+  pymupdf4llm: {}
+  nuextract: {model: numind/NuExtract3}
+repetitions: 1
+concurrency: 1
+warmup: 0
+output:
+  dir: ../results

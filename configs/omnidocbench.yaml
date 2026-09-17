@@ -1,0 +1,26 @@
+# Download the official JSON annotations and page images, as described in README.
+manifest: ../datasets/omnidocbench/OmniDocBench.json
+root: ../datasets/omnidocbench
+benchmark: omnidocbench
+mode: parse
+limit: 3
+benchmark_options:
+  match_method: quick_match
+  cdm: false
+  timeout_s: 600
+tools:
+  llamaparse: {}
+  datalab: {}
+  reducto: {}
+  mistral: {}
+  unstructured_api: {strategy: hi_res}
+  docling: {}
+  marker: {}
+  unstructured: {partition: {strategy: hi_res, infer_table_structure: true}}
+  mineru: {}
+  paddleocr: {}
+  olmocr: {}
+  pymupdf4llm: {}
+  nuextract: {model: numind/NuExtract3}
+output:
+  dir: ../results
