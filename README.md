@@ -167,7 +167,163 @@ time is recorded separately from inference. Local native output includes library
 versions where available; hosted responses retain provider metadata. No quality or
 speed ranking is implied by a wiring smoke test.
 
-## What it measures
+## Capability scorecards
+
+Every reader run now writes a `scorecard.json` per tool and a linked Markdown report.
+Scores are **per document**, averaging successful repetitions before averaging documents.
+For ParseBench, a document/group pair is an evaluation unit; the scorecard also reports
+distinct source-document hashes and family counts separately.
+There is no weighted overall winner: table structure, numeric fidelity, and missing
+content remain separate. Every metric includes its document count and direction where
+known. Category and tag groups can overlap; never sum their counts as unique documents.
+
+| Rubric | Measurement |
+|---|---|
+| Text fidelity | Exact character/word edit rates (CER/WER) when transcription gold exists |
+| Completeness | Missing, extra and duplicated token rates, explicitly labelled bag-of-token proxies; official ParseBench content rules |
+| Numeric fidelity | Annotated field values, signs, units, currencies and dates; explicit tolerances and label context |
+| Structure | Official ParseBench table/header, formatting and reading-order metrics; OmniDocBench table and order metrics |
+| Charts | Official ParseBench labelled data-point checks with released tolerances |
+| Traceability | Official ParseBench visual grounding when native geometry is available; optional page/box checks |
+| Reliability | Inference completion, inference failures, scoring failures and unsupported scoring reported separately |
+| Robustness | Category/tag slices and explicit paired `variant_of` deltas; no claim of robustness without annotated variants |
+| Repeatability | Output-hash agreement and score variance across repetitions, with failed runs counted |
+| Performance | Median/p95 latency, parsing and downstream time, actual-wall-time document/page throughput |
+| Cost | Configured-rate USD estimates, known-cost coverage, cost per 1,000 attempted pages and usable document |
+| Downstream usefulness | Optional fixed-model QA; existing fixed-model schema extraction; both labelled combined-system measurements |
+
+An unavailable metric stays **not measured**, never zero. Partial official evaluations
+retain the supported metrics and their unsupported-capability reason. A successful parse
+with no native bounding boxes counts as successful inference but does not establish
+visual-grounding accuracy. Raw output, gold/rules, normalized output, official verdicts,
+and source links remain available in each document's artifact directory.
+
+Use `repetitions`, `concurrency`, and `warmup` in any reader YAML:
+
+```yaml
+repetitions: 3
+concurrency: 2
+warmup: 1
+costs: {}  # Unknown until you supply actual rates; an absent price is not free.
+environment: {hardware: "describe CPU/GPU and memory here"}
+```
+
+Each price entry is keyed by reader name, or `shared_extractor` for downstream calls,
+and accepts `per_document_usd`, `per_page_usd`, and `per_second_usd`. Rates add together;
+an explicit zero can describe free inference. The report includes failed, repeated and
+warmup attempts in its total-run cost section. Prices are estimates, not billing data;
+unreported provider-internal retries and charges cannot be inferred. Page-based metrics
+require an annotated page count or a readable PDF/image. Quality scoring is outside the
+throughput timing window. Local reader processes still start afresh for every call, so
+warmup does **not** produce warmed-model local latency. No memory or GPU utilization
+measurement is claimed; record hardware explicitly for meaningful comparisons.
+
+### ParseBench: five parsing capabilities
+
+The [official dataset](https://huggingface.co/datasets/llamaindex/ParseBench) has
+`table`, `chart`, `text_content`, `text_formatting`, and `layout` groups. OCR is an
+`ocr` tag within text groups. Other tags include `multicolumns`, `multilang`, difficulty,
+and handwriting. Documents are parsed once per document/group, never once per rule.
+
+Use Python **3.12+** for the optional `parse-bench==1.0.4` evaluator. To isolate it,
+install the package in another environment and set `PARSEBENCH_PYTHON` in `.env` to
+that environment's Python. Blank uses the benchmark's interpreter.
+
+```bash
+pip install -e '.[parsebench,omni]'
+hf download llamaindex/ParseBench --repo-type dataset \
+  --revision 2805a1d940f95a203e0ae4b88be9934f7765b3fc \
+  --local-dir datasets/parsebench
+docbench run-readers -c configs/parsebench.yaml --inventory
+docbench run-readers -c configs/parsebench.yaml --list
+docbench run-readers -c configs/parsebench.yaml
+docbench run-readers -c configs/parsebench.yaml --category text_content --tag ocr
+```
+
+The example selects at most three documents per category; set `per_category_limit: null`
+for the full dataset. For a partial corpus, list the downloaded categories explicitly
+in `benchmark_options.categories`; missing requested category files fail before inference.
+Native layout normalization uses upstream provider adapters. Some adapters need optional
+provider packages such as `parse-bench[llamaparse,docling,reducto,datalab]` in the evaluator
+environment. Missing geometry or its adapter is visible as unsupported. The optional
+paid LLM chart normalization is always disabled. Official metrics retain their names
+and scales, including diagnostic counts. Our document averages are not advertised as
+the upstream leaderboard's aggregate. [Official evaluator](https://github.com/run-llama/ParseBench)
+
+### OmniDocBench: text, tables, formulas and reading order
+
+Use the [official checkout](https://github.com/opendatalab/OmniDocBench) at
+`f133a71e9e91c3621c7ce8994200a7b394a06eb3` in a separate Python **3.11** environment
+(this upstream version requires Python below 3.12). Install it with `pip install -e`
+pointing to that checkout. Set `OMNIDOCBENCH_ROOT` and `OMNIDOCBENCH_PYTHON` in `.env`.
+
+```bash
+hf download opendatalab/OmniDocBench --repo-type dataset \
+  --revision aa1ee96d106dbe53d0ae59474d75c6e6d9b53fec \
+  --include OmniDocBench.json 'images/*' --local-dir datasets/omnidocbench
+docbench run-readers -c configs/omnidocbench.yaml --inventory
+docbench run-readers -c configs/omnidocbench.yaml
+```
+
+For a smaller check, point the config's `manifest` to
+`<checkout>/demo_data/omnidocbench_demo/OmniDocBench_demo.json` and `root` to its parent.
+This integration executes the official Markdown end-to-end evaluator. It reports text,
+formula and reading-order edit distances (lower is better), table TEDS/structure TEDS
+(higher is better), and optional formula CDM. Enable `benchmark_options.cdm: true` only
+after installing the upstream rendering prerequisites: TeX Live/CJK, Ghostscript and
+ImageMagick 7 with PDF support. Missing CDM dependencies remain unavailable. Chart-value
+extraction and bounding-box detection are not measured by this particular track.
+Page/block attributes become filterable tags such as `language:english`.
+
+### Your financial corpus and held-out evaluation
+
+`configs/financial_pilot.yaml` demonstrates annotations against the existing synthetic
+Acme text fixture. It is a wiring example, **not** a real financial benchmark. Replace
+its manifest with your reviewed documents. Use multiple categories/tags per document:
+
+```json
+{"doc_id":"report-2025","doc_path":"reports/2025.pdf","categories":["table","chart","text_content"],"tags":["financial","annual_report","ocr"],"family_id":"issuer-report-template","split":"test","page_count":80}
+```
+
+An optional `annotations` JSONL sidecar joins on `doc_id`, so an upstream corpus need
+not be modified. It can add `categories`, `tags`, `family_id`, `split`, `page_count`,
+`variant_of`, `text_gold`, `checks`, `qa`, and `annotation_note`. Sidecar text-gold paths
+are relative to the sidecar; manifest paths are relative to `root`. Unknown/duplicate
+annotation IDs fail rather than silently dropping labels. Category filters match any
+selected category; tag filters require all selected tags. Family IDs spanning multiple
+declared splits are rejected before filtering; identical source bytes across declared
+splits are also rejected. Group related pages, filings and templates into explicit
+families: source-path grouping cannot discover every common template automatically.
+
+```bash
+docbench run-readers -c configs/financial_pilot.yaml --inventory
+docbench run-readers -c configs/financial_pilot.yaml --repetitions 3 --concurrency 2
+# Once a reviewed corpus contains those labels:
+docbench run-readers -c configs/financial_pilot.yaml --split test --tag financial
+```
+
+See `datasets/financial_annotations.jsonl` for working numeric, currency, period, reading
+order and QA examples. Numeric checks require a field context or a regex with a named
+`value` group; ambiguous multiple values remain unmeasured unless the annotation selects
+one. Values are not silently rescaled: annotate the expected displayed number and unit.
+Optional `location` checks require normalized `result.elements` with one-based page and
+normalized `[x0,y0,x1,y1]` boxes; the current readers preserve raw native geometry, while
+ParseBench performs provider-specific normalization for its own layout evaluator.
+
+To compare robustness, supply a reviewed altered document with `variant_of` set to its
+baseline `doc_id`, and keep both in the same family/split. Paired deltas use only shared
+metrics and show failures and missing pairs. No synthetic degradation is generated
+automatically. Keep dev and test families separate when tuning prompts/options.
+
+For downstream QA, set `downstream_qa: true` and the existing `DOCBENCH_EXTRACT_*`
+variables. Every reader uses that same model, prompt and question schema. Gold answers
+are kept out of the model request and used only for scoring; raw answers and individual
+verdicts are retained. These QA scores describe the parser-plus-answerer system.
+
+Omni-Extract-Bench's four `suite` values describe data sources, not table/chart/OCR
+capabilities. Add reviewed sidecar tags for those slices; unlabelled data remains visible.
+
+## What the existing QA/stress commands measure
 
 ### Qualitative
 

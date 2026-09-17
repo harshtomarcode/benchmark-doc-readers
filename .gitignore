@@ -227,3 +227,5 @@ configs/*secret*
 .env.*
 .venv-*/
 datasets/omni_extract_bench/
+datasets/parsebench/
+datasets/omnidocbench/

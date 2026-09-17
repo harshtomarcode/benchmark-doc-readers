@@ -60,6 +60,14 @@ def build_parser() -> argparse.ArgumentParser:
     readers_p.add_argument(
         "--run-name", help="New output directory name; existing runs are preserved"
     )
+    readers_p.add_argument("--category", action="append", help="Keep any selected category")
+    readers_p.add_argument("--tag", action="append", help="Require each selected document tag")
+    readers_p.add_argument("--split", action="append", help="Keep selected corpus splits")
+    readers_p.add_argument("--repetitions", type=int, help="Measured repetitions per document")
+    readers_p.add_argument("--concurrency", type=int, help="Maximum simultaneous reader calls")
+    readers_p.add_argument(
+        "--inventory", action="store_true", help="Inspect corpus without inference"
+    )
 
     return parser
 
@@ -83,6 +91,15 @@ def main(argv: list[str] | None = None) -> int:
             cfg.limit = args.limit
         if args.run_name:
             cfg.output.run_name = args.run_name
+        for key in ("repetitions", "concurrency"):
+            value = getattr(args, key)
+            if value is not None:
+                if value < 1:
+                    parser.error(f"--{key} must be positive")
+                setattr(cfg, key, value)
+        for flag, field in (("category", "categories"), ("tag", "tags"), ("split", "splits")):
+            if getattr(args, flag):
+                setattr(cfg, field, getattr(args, flag))
         if args.tool:
             unknown = set(args.tool) - READERS.keys()
             if unknown:
@@ -95,6 +112,20 @@ def main(argv: list[str] | None = None) -> int:
                     f"(gate: {tool['gate']}; route: {tool['route']})",
                     markup=False,
                 )
+            return 0
+        if args.inventory:
+            from collections import Counter
+
+            from docbench.reader_benchmark import load_documents
+
+            docs = load_documents(cfg)
+            console.print(f"Selected documents: {len(docs)}")
+            for field in ("categories", "tags", "suite", "split"):
+                values = Counter()
+                for doc in docs:
+                    value = doc.get(field) or "unlabelled"
+                    values.update(value if isinstance(value, list) else [value])
+                console.print(f"{field}: {dict(sorted(values.items()))}", markup=False)
             return 0
         return 1 if run_readers(cfg)["n_errors"] else 0
 

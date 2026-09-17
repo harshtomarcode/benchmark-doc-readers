@@ -1,0 +1,20 @@
+# Synthetic fixture demonstrating annotations, not an accuracy or held-out benchmark.
+# Replace with your reviewed PDFs and family-disjoint dev/test annotations.
+manifest: ../datasets/financial_pilot.jsonl
+annotations: ../datasets/financial_annotations.jsonl
+benchmark: custom
+mode: parse
+tools:
+  docling: {}
+  unstructured: {}
+  nuextract: {model: numind/NuExtract3}
+repetitions: 3
+concurrency: 1
+warmup: 0
+downstream_qa: false
+# Set true only with DOCBENCH_EXTRACT_* configured to one fixed model.
+# Empty costs mean unknown. Fill actual rates rather than copying vendor list prices.
+costs: {}
+environment: {}
+output:
+  dir: ../results
